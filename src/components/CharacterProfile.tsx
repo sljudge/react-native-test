@@ -16,12 +16,12 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
   navigation,
 }: CharacterProfileProps) => {
   const { character } = route.params;
-  const { isLoading, error, data } = useCharacterDetails(character);
+  const { isFetching, error, data } = useCharacterDetails(character);
 
   const characterData: CharacterDetailsFragment = data ?? character;
 
   console.log({
-    isLoading,
+    isFetching,
     error,
     characterData,
   });
@@ -40,7 +40,7 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
         }}
       />
       <Text>{characterData?.name}</Text>
-      {isLoading ? (
+      {isFetching ? (
         <Text>Loading...</Text>
       ) : (
         <>

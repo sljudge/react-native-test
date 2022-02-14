@@ -19,7 +19,7 @@ export const CharacterList: React.FC<CharacterListProps> = ({ navigation }) => {
   const { isLoading, error, data } = useCharacters(page);
 
   if (isLoading) return <Text>Loading...</Text>;
-  if (error) return <Text>{error.message}</Text>;
+  if (error) return <Text>There has been an error</Text>;
 
   return (
     <View

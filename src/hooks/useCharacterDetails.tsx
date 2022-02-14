@@ -14,6 +14,7 @@ export function useCharacterDetails(character: CharacterFragment) {
       characterId: id,
     },
     {
+      staleTime: 0,
       initialData: { character },
       onSuccess: () => {
         console.log(Date.now(), `Fetching character #${id} details succeed`);
