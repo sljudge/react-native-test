@@ -32,7 +32,11 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
           <Stack.Navigator>
             <Stack.Screen name="Home" component={CharacterList} />
-            <Stack.Screen name="Character" component={CharacterProfile} />
+            <Stack.Screen
+              name="Character"
+              component={CharacterProfile}
+              options={({ route }) => ({ title: route.params.character?.name })}
+            />
           </Stack.Navigator>
           <ReactQueryDevtools initialIsOpen />
         </QueryClientProvider>
@@ -40,22 +44,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: StatusBar.currentHeight,
-  },
-  nav: {
-    backgroundColor: "#1E1E1E",
-    color: "#EFEFEF",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: 60,
-  },
-  navItem: {
-    color: "#EFEFEF",
-  },
-});

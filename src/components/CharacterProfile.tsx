@@ -53,12 +53,11 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
           borderRadius: 10,
         }}
       />
-      <Text>{data.character?.name}</Text>
+      <Text>{data.character?.id}</Text>
       {isFetching ? (
         <Text>Loading...</Text>
       ) : (
         <>
-          <Text>{data.character?.id}</Text>
           <Text>{data.character?.species}</Text>
           <Text>{data.character?.gender}</Text>
           <Text>{data.character?.origin?.name}</Text>

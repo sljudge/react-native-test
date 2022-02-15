@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { RequestInit } from 'graphql-request/dist/types.dom';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions, useInfiniteQuery, UseInfiniteQueryOptions, QueryFunctionContext } from 'react-query';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -222,7 +222,7 @@ export type GetAllCharactersQueryVariables = Exact<{
 }>;
 
 
-export type GetAllCharactersQuery = { __typename?: 'Query', characters?: { __typename?: 'Characters', info?: { __typename?: 'Info', pages?: number | null } | null, results?: Array<{ __typename?: 'Character', id?: string | null, name?: string | null, image?: string | null } | null> | null } | null };
+export type GetAllCharactersQuery = { __typename?: 'Query', characters?: { __typename?: 'Characters', info?: { __typename?: 'Info', pages?: number | null, next?: number | null, prev?: number | null } | null, results?: Array<{ __typename?: 'Character', id?: string | null, name?: string | null, image?: string | null } | null> | null } | null };
 
 export const CharacterFragmentDoc = `
     fragment character on Character {
@@ -269,12 +269,34 @@ export const useGetCharacterDetailsQuery = <
 useGetCharacterDetailsQuery.getKey = (variables: GetCharacterDetailsQueryVariables) => ['GetCharacterDetails', variables];
 ;
 
+export const useInfiniteGetCharacterDetailsQuery = <
+      TData = GetCharacterDetailsQuery,
+      TError = unknown
+    >(
+      pageParamKey: keyof GetCharacterDetailsQueryVariables,
+      client: GraphQLClient,
+      variables: GetCharacterDetailsQueryVariables,
+      options?: UseInfiniteQueryOptions<GetCharacterDetailsQuery, TError, TData>,
+      headers?: RequestInit['headers']
+    ) =>
+    useInfiniteQuery<GetCharacterDetailsQuery, TError, TData>(
+      ['GetCharacterDetails.infinite', variables],
+      (metaData) => fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, {...variables, ...(metaData.pageParam ?? {})}, headers)(),
+      options
+    );
+
+
+useInfiniteGetCharacterDetailsQuery.getKey = (variables: GetCharacterDetailsQueryVariables) => ['GetCharacterDetails.infinite', variables];
+;
+
 useGetCharacterDetailsQuery.fetcher = (client: GraphQLClient, variables: GetCharacterDetailsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, variables, headers);
 export const GetAllCharactersDocument = `
     query GetAllCharacters($page: Int) {
   characters(page: $page) {
     info {
       pages
+      next
+      prev
     }
     results {
       ...character
@@ -298,6 +320,26 @@ export const useGetAllCharactersQuery = <
     );
 
 useGetAllCharactersQuery.getKey = (variables?: GetAllCharactersQueryVariables) => variables === undefined ? ['GetAllCharacters'] : ['GetAllCharacters', variables];
+;
+
+export const useInfiniteGetAllCharactersQuery = <
+      TData = GetAllCharactersQuery,
+      TError = unknown
+    >(
+      pageParamKey: keyof GetAllCharactersQueryVariables,
+      client: GraphQLClient,
+      variables?: GetAllCharactersQueryVariables,
+      options?: UseInfiniteQueryOptions<GetAllCharactersQuery, TError, TData>,
+      headers?: RequestInit['headers']
+    ) =>
+    useInfiniteQuery<GetAllCharactersQuery, TError, TData>(
+      variables === undefined ? ['GetAllCharacters.infinite'] : ['GetAllCharacters.infinite', variables],
+      (metaData) => fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, {...variables, ...(metaData.pageParam ?? {})}, headers)(),
+      options
+    );
+
+
+useInfiniteGetAllCharactersQuery.getKey = (variables?: GetAllCharactersQueryVariables) => variables === undefined ? ['GetAllCharacters.infinite'] : ['GetAllCharacters.infinite', variables];
 ;
 
 useGetAllCharactersQuery.fetcher = (client: GraphQLClient, variables?: GetAllCharactersQueryVariables, headers?: RequestInit['headers']) => fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, variables, headers);

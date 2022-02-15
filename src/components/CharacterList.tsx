@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Button,
+  ScrollView,
 } from "react-native";
 import { useQueryClient } from "react-query";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -16,63 +17,70 @@ import {
   useGetAllCharactersQuery,
   GetAllCharactersQuery,
   useGetCharacterDetailsQuery,
+  useInfiniteGetAllCharactersQuery,
+  Character,
+  CharacterFragment,
 } from "../generated/graphql";
 import graphqlRequestClient from "../requests/graphqlRequestClient";
 
 type CharacterListProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export const CharacterList: React.FC<CharacterListProps> = ({ navigation }) => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(5);
   const queryClient = useQueryClient();
-  const { isLoading, error, data, isPreviousData, isFetching } =
-    useGetAllCharactersQuery<GetAllCharactersQuery, Error>(
-      graphqlRequestClient,
-      { page: page },
-      { keepPreviousData: true, staleTime: 60 * 1000 }
-    );
+  const {
+    isLoading,
+    error,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteGetAllCharactersQuery<GetAllCharactersQuery, Error>(
+    "page",
+    graphqlRequestClient,
+    {},
+    {
+      keepPreviousData: true,
+      getNextPageParam: (lastPage, pages) => ({
+        page: lastPage?.characters?.info.next,
+      }),
+    }
+  );
 
   if (error) return <Text>There has been an error</Text>;
+  if (isLoading) return <Text>Loading...</Text>;
 
-  const isBusy = isLoading || isFetching;
+  console.log({
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+  });
   return (
-    <View
-      style={{
-        flex: 1,
+    <ScrollView
+      contentContainerStyle={{
+        flexDirection: "row",
+        flexWrap: "wrap",
         justifyContent: "center",
-        alignItems: "center",
         paddingBottom: 30,
       }}
     >
-      {isBusy ? (
-        <Text>Loading...</Text>
-      ) : (
-        <FlatList
-          numColumns={3}
-          contentContainerStyle={{
-            width: Dimensions.get("window").width,
-          }}
-          keyExtractor={(item, index) => index.toString()}
-          columnWrapperStyle={{
-            paddingTop: 10,
-            paddingBottom: 10,
-          }}
-          data={data?.characters?.results}
-          renderItem={({ item }) => (
+      {data?.pages?.map((page, i) => (
+        <React.Fragment key={i}>
+          {page.characters?.results?.map((character) => (
             <View
+              key={character.id}
               style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
+                margin: 10,
               }}
             >
               <TouchableOpacity
                 activeOpacity={0.5}
-                onPress={() =>
-                  navigation.navigate("Character", { character: item })
-                }
+                onPress={() => navigation.navigate("Character", { character })}
               >
                 <Image
-                  source={{ uri: item.image }}
+                  source={{ uri: character.image }}
                   fadeDuration={500}
                   style={{
                     width: 90,
@@ -83,9 +91,9 @@ export const CharacterList: React.FC<CharacterListProps> = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
-          )}
-        />
-      )}
+          ))}
+        </React.Fragment>
+      ))}
       <View
         style={{
           flexDirection: "row",
@@ -98,33 +106,17 @@ export const CharacterList: React.FC<CharacterListProps> = ({ navigation }) => {
         }}
       >
         <Button
-          title="Previous"
-          onPress={() => {
-            if (!isPreviousData && page > 0) {
-              setPage((old) => old - 1);
-            }
-          }}
-          disabled={!isBusy && page === 1}
-        />
-        <Button
-          title="Next"
-          onPress={() => {
-            setPage(page + 1);
-          }}
-          disabled={!isBusy && isPreviousData}
-        />
-        <Button
-          title="Prefetch"
-          onPress={async () => {
-            await queryClient.fetchQuery(
-              useGetAllCharactersQuery.getKey({ page: page + 1 }),
-              useGetAllCharactersQuery.fetcher(graphqlRequestClient, {
-                page: page + 1,
-              })
-            );
-          }}
+          title={
+            isFetchingNextPage
+              ? "Loading more..."
+              : hasNextPage
+              ? "Load More"
+              : "Nothing more to load"
+          }
+          onPress={() => fetchNextPage()}
+          disabled={!hasNextPage || isFetchingNextPage}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
