@@ -29,8 +29,7 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
     { characterId: character.id },
     {
       initialData: { character },
-      staleTime: 5 * 1000,
-      initialDataUpdatedAt: Date.now() - 7000,
+      staleTime: 0,
       onSuccess: () => {
         console.log(
           Date.now(),

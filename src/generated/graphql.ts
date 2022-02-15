@@ -222,7 +222,7 @@ export type GetAllCharactersQueryVariables = Exact<{
 }>;
 
 
-export type GetAllCharactersQuery = { __typename?: 'Query', characters?: { __typename?: 'Characters', results?: Array<{ __typename?: 'Character', id?: string | null, name?: string | null, image?: string | null } | null> | null } | null };
+export type GetAllCharactersQuery = { __typename?: 'Query', characters?: { __typename?: 'Characters', info?: { __typename?: 'Info', pages?: number | null } | null, results?: Array<{ __typename?: 'Character', id?: string | null, name?: string | null, image?: string | null } | null> | null } | null };
 
 export const CharacterFragmentDoc = `
     fragment character on Character {
@@ -265,9 +265,17 @@ export const useGetCharacterDetailsQuery = <
       fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, variables, headers),
       options
     );
+
+useGetCharacterDetailsQuery.getKey = (variables: GetCharacterDetailsQueryVariables) => ['GetCharacterDetails', variables];
+;
+
+useGetCharacterDetailsQuery.fetcher = (client: GraphQLClient, variables: GetCharacterDetailsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, variables, headers);
 export const GetAllCharactersDocument = `
     query GetAllCharacters($page: Int) {
   characters(page: $page) {
+    info {
+      pages
+    }
     results {
       ...character
     }
@@ -288,3 +296,8 @@ export const useGetAllCharactersQuery = <
       fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, variables, headers),
       options
     );
+
+useGetAllCharactersQuery.getKey = (variables?: GetAllCharactersQueryVariables) => variables === undefined ? ['GetAllCharacters'] : ['GetAllCharacters', variables];
+;
+
+useGetAllCharactersQuery.fetcher = (client: GraphQLClient, variables?: GetAllCharactersQueryVariables, headers?: RequestInit['headers']) => fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, variables, headers);

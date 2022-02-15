@@ -1,6 +1,7 @@
 import "react-native-gesture-handler";
 import { StyleSheet, StatusBar } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { GraphQLClientProvider } from "./src/providers/GraphQLClientProvider";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -33,6 +34,7 @@ export default function App() {
             <Stack.Screen name="Home" component={CharacterList} />
             <Stack.Screen name="Character" component={CharacterProfile} />
           </Stack.Navigator>
+          <ReactQueryDevtools initialIsOpen />
         </QueryClientProvider>
       </GraphQLClientProvider>
     </NavigationContainer>

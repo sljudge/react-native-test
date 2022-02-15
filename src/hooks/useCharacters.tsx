@@ -6,10 +6,14 @@ export function useCharacters(page = 0) {
   const queryInfo = useGetAllCharactersQuery(
     graphQLClient,
     { page: page },
-    { keepPreviousData: true }
+    {
+      keepPreviousData: true,
+    }
   );
   return {
     ...queryInfo,
     characters: queryInfo.data?.characters?.results,
+    numberOfPages: queryInfo.data?.characters?.info?.pages,
+    fetcher: useGetAllCharactersQuery.fetcher,
   };
 }
