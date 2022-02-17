@@ -1,15 +1,9 @@
-import { GraphQLClient } from 'graphql-request';
-import { RequestInit } from 'graphql-request/dist/types.dom';
-import { useQuery, UseQueryOptions, useInfiniteQuery, UseInfiniteQueryOptions, QueryFunctionContext } from 'react-query';
+import { api } from './rickAndMortyApi';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-
-function fetcher<TData, TVariables>(client: GraphQLClient, query: string, variables?: TVariables, headers?: RequestInit['headers']) {
-  return async (): Promise<TData> => client.request<TData, TVariables>(query, variables, headers);
-}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -251,45 +245,6 @@ export const GetCharacterDetailsDocument = `
   }
 }
     ${CharacterDetailsFragmentDoc}`;
-export const useGetCharacterDetailsQuery = <
-      TData = GetCharacterDetailsQuery,
-      TError = unknown
-    >(
-      client: GraphQLClient,
-      variables: GetCharacterDetailsQueryVariables,
-      options?: UseQueryOptions<GetCharacterDetailsQuery, TError, TData>,
-      headers?: RequestInit['headers']
-    ) =>
-    useQuery<GetCharacterDetailsQuery, TError, TData>(
-      ['GetCharacterDetails', variables],
-      fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, variables, headers),
-      options
-    );
-
-useGetCharacterDetailsQuery.getKey = (variables: GetCharacterDetailsQueryVariables) => ['GetCharacterDetails', variables];
-;
-
-export const useInfiniteGetCharacterDetailsQuery = <
-      TData = GetCharacterDetailsQuery,
-      TError = unknown
-    >(
-      pageParamKey: keyof GetCharacterDetailsQueryVariables,
-      client: GraphQLClient,
-      variables: GetCharacterDetailsQueryVariables,
-      options?: UseInfiniteQueryOptions<GetCharacterDetailsQuery, TError, TData>,
-      headers?: RequestInit['headers']
-    ) =>
-    useInfiniteQuery<GetCharacterDetailsQuery, TError, TData>(
-      ['GetCharacterDetails.infinite', variables],
-      (metaData) => fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, {...variables, ...(metaData.pageParam ?? {})}, headers)(),
-      options
-    );
-
-
-useInfiniteGetCharacterDetailsQuery.getKey = (variables: GetCharacterDetailsQueryVariables) => ['GetCharacterDetails.infinite', variables];
-;
-
-useGetCharacterDetailsQuery.fetcher = (client: GraphQLClient, variables: GetCharacterDetailsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>(client, GetCharacterDetailsDocument, variables, headers);
 export const GetAllCharactersDocument = `
     query GetAllCharacters($page: Int) {
   characters(page: $page) {
@@ -304,42 +259,18 @@ export const GetAllCharactersDocument = `
   }
 }
     ${CharacterFragmentDoc}`;
-export const useGetAllCharactersQuery = <
-      TData = GetAllCharactersQuery,
-      TError = unknown
-    >(
-      client: GraphQLClient,
-      variables?: GetAllCharactersQueryVariables,
-      options?: UseQueryOptions<GetAllCharactersQuery, TError, TData>,
-      headers?: RequestInit['headers']
-    ) =>
-    useQuery<GetAllCharactersQuery, TError, TData>(
-      variables === undefined ? ['GetAllCharacters'] : ['GetAllCharacters', variables],
-      fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, variables, headers),
-      options
-    );
 
-useGetAllCharactersQuery.getKey = (variables?: GetAllCharactersQueryVariables) => variables === undefined ? ['GetAllCharacters'] : ['GetAllCharacters', variables];
-;
+const injectedRtkApi = api.injectEndpoints({
+  endpoints: (build) => ({
+    GetCharacterDetails: build.query<GetCharacterDetailsQuery, GetCharacterDetailsQueryVariables>({
+      query: (variables) => ({ document: GetCharacterDetailsDocument, variables })
+    }),
+    GetAllCharacters: build.query<GetAllCharactersQuery, GetAllCharactersQueryVariables | void>({
+      query: (variables) => ({ document: GetAllCharactersDocument, variables })
+    }),
+  }),
+});
 
-export const useInfiniteGetAllCharactersQuery = <
-      TData = GetAllCharactersQuery,
-      TError = unknown
-    >(
-      pageParamKey: keyof GetAllCharactersQueryVariables,
-      client: GraphQLClient,
-      variables?: GetAllCharactersQueryVariables,
-      options?: UseInfiniteQueryOptions<GetAllCharactersQuery, TError, TData>,
-      headers?: RequestInit['headers']
-    ) =>
-    useInfiniteQuery<GetAllCharactersQuery, TError, TData>(
-      variables === undefined ? ['GetAllCharacters.infinite'] : ['GetAllCharacters.infinite', variables],
-      (metaData) => fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, {...variables, ...(metaData.pageParam ?? {})}, headers)(),
-      options
-    );
+export { injectedRtkApi as api };
+export const { useGetCharacterDetailsQuery, useLazyGetCharacterDetailsQuery, useGetAllCharactersQuery, useLazyGetAllCharactersQuery } = injectedRtkApi;
 
-
-useInfiniteGetAllCharactersQuery.getKey = (variables?: GetAllCharactersQueryVariables) => variables === undefined ? ['GetAllCharacters.infinite'] : ['GetAllCharacters.infinite', variables];
-;
-
-useGetAllCharactersQuery.fetcher = (client: GraphQLClient, variables?: GetAllCharactersQueryVariables, headers?: RequestInit['headers']) => fetcher<GetAllCharactersQuery, GetAllCharactersQueryVariables>(client, GetAllCharactersDocument, variables, headers);

@@ -1,13 +1,15 @@
 schema: https://rickandmortyapi.com/graphql
 documents: "./src/**/*.graphql"
 generates:
-  ./src/generated/graphql.ts:
+  ./src/api/types.generated.ts:
+    plugins:
+      - typescript
+    config:
+      maybeValue: T
+  ./src/api/graphql.generated.ts:
     plugins:
       - typescript
       - typescript-operations
-      - typescript-react-query
-    config:
-      fetcher: graphql-request
-      exposeFetcher: true
-      exposeQueryKeys: true
-      addInfiniteQuery: true
+      - typescript-rtk-query:
+          importBaseApiFrom: "./rickAndMortyApi"
+          exportHooks: true

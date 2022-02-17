@@ -1,15 +1,8 @@
-// index.tsx
 import React from "react";
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
-import { useCharacterDetails } from "../hooks/useCharacterDetails";
-import {
-  useGetCharacterDetailsQuery,
-  GetCharacterDetailsQuery,
-  CharacterDetailsFragment,
-} from "../generated/graphql";
-import graphqlRequestClient from "../requests/graphqlRequestClient";
+import { useGetCharacterDetailsQuery } from "../api/graphql.generated";
 
 type CharacterProfileProps = NativeStackScreenProps<
   RootStackParamList,
@@ -21,30 +14,17 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
   navigation,
 }: CharacterProfileProps) => {
   const { character } = route.params;
-  const { isFetching, error, data } = useGetCharacterDetailsQuery<
-    GetCharacterDetailsQuery,
-    Error
-  >(
-    graphqlRequestClient,
-    { characterId: character.id },
-    {
-      initialData: { character },
-      staleTime: 5 * 1000,
-      initialDataUpdatedAt: Date.now() - 7000,
-      onSuccess: () => {
-        console.log(
-          Date.now(),
-          `Fetching character #${character.id} details succeed`
-        );
-      },
-    }
-  );
+  const { isFetching, error, data, isLoading } = useGetCharacterDetailsQuery({
+    characterId: character.id,
+  });
+
+  console.log(character, data);
 
   if (error) return <Text>There has been an error</Text>;
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
       <Image
-        source={{ uri: data.character?.image }}
+        source={{ uri: character?.image }}
         fadeDuration={500}
         style={{
           width: 200,
@@ -53,8 +33,8 @@ export const CharacterProfile: React.FC<CharacterProfileProps> = ({
           borderRadius: 10,
         }}
       />
-      <Text>{data.character?.id}</Text>
-      {isFetching ? (
+      <Text>{character?.id}</Text>
+      {isFetching || isLoading ? (
         <Text>Loading...</Text>
       ) : (
         <>
