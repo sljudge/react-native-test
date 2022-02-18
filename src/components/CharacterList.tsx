@@ -16,6 +16,7 @@ export const CharacterList: React.FC<CharacterListProps> = ({ navigation }) => {
 
   if (error) return <Text>There has been an error</Text>;
   if (isLoading) return <Text>Loading...</Text>;
+  
 
   return (
     <ScrollView
